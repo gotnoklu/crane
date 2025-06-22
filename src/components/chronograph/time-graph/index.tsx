@@ -174,7 +174,7 @@ export default function TimeGraph(props: TimeGraphProps) {
     <TimeGraphCard running={isRunning} enlarged={props.enlarged}>
       <TimeGraphHeader name={props.name} enlarged={props.enlarged} onClose={props.onClose} />
       <Stack gap={2} paddingX={6} paddingY={3}>
-        <Stack direction="row" alignItems="center">
+        <Stack direction="row" alignItems="baseline">
           <Show
             when={isRunning() || !isTimer()}
             fallback={
@@ -183,6 +183,7 @@ export default function TimeGraph(props: TimeGraphProps) {
                 maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
+                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
                 }}
                 value={time.hours.toString().padStart(2, '0')}
                 onKeyDown={updateHours}
@@ -208,8 +209,11 @@ export default function TimeGraph(props: TimeGraphProps) {
             when={isRunning() || !isTimer()}
             fallback={
               <StyledInput
+                minlength="2"
+                maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
+                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
                 }}
                 value={time.minutes.toString().padStart(2, '0')}
                 onKeyDown={updateMinutes}
@@ -235,10 +239,11 @@ export default function TimeGraph(props: TimeGraphProps) {
             when={isRunning() || !isTimer()}
             fallback={
               <StyledInput
-                min="0"
-                max="59"
+                minlength="2"
+                maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
+                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
                 }}
                 value={time.seconds.toString().padStart(2, '0')}
                 onKeyDown={updateSeconds}
@@ -251,6 +256,16 @@ export default function TimeGraph(props: TimeGraphProps) {
               fontSize={props.enlarged ? 'h1.fontSize' : 'h4.fontSize'}
             >
               {time.seconds.toString().padStart(2, '0')}
+            </Typography>
+          </Show>
+          <Show when={!isTimer()}>
+            <Typography
+              component="span"
+              variant="monospace"
+              color="text.secondary"
+              fontSize={props.enlarged ? 'h4.fontSize' : 'body1.fontSize'}
+            >
+              .{time.milliseconds.toString().padStart(2, '0')}
             </Typography>
           </Show>
         </Stack>
