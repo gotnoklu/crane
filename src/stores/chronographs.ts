@@ -2,7 +2,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { createStore } from 'solid-js/store'
 
 export type Chronograph = {
-  id: number
+  id: string
   workspace_id: number
   name: string
   kind: 'timer' | 'stopwatch'
@@ -37,7 +37,7 @@ export async function addChronograph(
 
 export async function updateChronograph(payload: {
   workspace_id: number
-  id: number
+  id: string
   chronograph: Partial<Omit<Chronograph, 'id' | 'workspace_id' | 'created_at' | 'modified_at'>>
 }) {
   const { id } = payload
@@ -58,7 +58,7 @@ export async function updateChronograph(payload: {
   return await invoke<boolean>('update_chronograph', payload)
 }
 
-export async function deleteChronograph(payload: { workspace_id: number; id: number }) {
+export async function deleteChronograph(payload: { workspace_id: number; id: string }) {
   setChronographs((prev) => prev.filter((chronograph) => chronograph.id !== payload.id))
   return await invoke<boolean>('delete_chronograph', payload)
 }
