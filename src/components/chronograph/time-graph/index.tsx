@@ -384,7 +384,7 @@ export default function TimeGraph(props: TimeGraphProps) {
                 maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
-                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
+                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 1.5)',
                 }}
                 value={graph.hours.toString().padStart(2, '0')}
                 onKeyDown={updateHours}
@@ -414,7 +414,7 @@ export default function TimeGraph(props: TimeGraphProps) {
                 maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
-                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
+                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 1.5)',
                 }}
                 value={graph.minutes.toString().padStart(2, '0')}
                 onKeyDown={updateMinutes}
@@ -444,7 +444,7 @@ export default function TimeGraph(props: TimeGraphProps) {
                 maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
-                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
+                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 1.5)',
                 }}
                 value={graph.seconds.toString().padStart(2, '0')}
                 onKeyDown={updateSeconds}
