@@ -56,11 +56,13 @@ export default function TimeGraph(props: TimeGraphProps) {
   const [isRunning, setIsRunning] = createSignal(false)
   const [isEditingName, setIsEditingName] = createSignal(false)
 
+  let nameInput!: HTMLInputElement
   let timer: number | undefined = undefined
   let startTime = 0
   let elapsedTime = props.duration
 
   const isTimer = createMemo(() => props.kind === 'timer')
+  const fontSize = createMemo(() => (props.enlarged ? 'h6.fontSize' : 'body1.fontSize'))
 
   function updateTimeGraph() {
     if (isTimer()) {
@@ -221,8 +223,6 @@ export default function TimeGraph(props: TimeGraphProps) {
     if (isNumberKey || isBackspaceKey) setGraph('seconds', calculateTimerValue(event))
   }
 
-  const fontSize = props.enlarged ? 'h6.fontSize' : 'body1.fontSize'
-
   function showEditButton(
     event: MouseEvent & {
       currentTarget: HTMLDivElement
@@ -245,11 +245,12 @@ export default function TimeGraph(props: TimeGraphProps) {
     }
   }
 
-  function toggleLabelInput() {
+  function toggleNameInput() {
     if (isEditingName()) {
       setIsEditingName(false)
     } else {
       setIsEditingName(true)
+      nameInput.focus()
     }
   }
 
@@ -257,7 +258,7 @@ export default function TimeGraph(props: TimeGraphProps) {
     setGraph((prev) => ({ ...prev, name: event.target.value }))
   }
 
-  async function saveLabelOnEnter(
+  async function saveNameOnEnter(
     event: KeyboardEvent & {
       currentTarget: HTMLInputElement
       target: DOMElement
@@ -311,11 +312,11 @@ export default function TimeGraph(props: TimeGraphProps) {
               fallback={
                 <Typography
                   color="text.secondary"
-                  fontSize={fontSize}
+                  fontSize={fontSize()}
                   fontWeight="medium"
                   textAlign={props.enlarged ? 'center' : 'left'}
                   sx={{ flex: 1, maxInlineSize: props.enlarged ? '100%' : '250px' }}
-                  onClick={toggleLabelInput}
+                  onClick={toggleNameInput}
                   noWrap
                 >
                   {graph.name}
@@ -323,17 +324,16 @@ export default function TimeGraph(props: TimeGraphProps) {
               }
             >
               <InputBase
-                id="label-input"
-                placeholder="Enter Label"
+                placeholder="Enter Name"
                 sx={{
                   fontSize: fontSize,
                   fontWeight: 'medium',
                   maxInlineSize: props.enlarged ? '100%' : '250px',
                   flex: 1,
                 }}
-                inputComponent={(props) => <input {...props} />}
+                inputComponent={(props) => <input {...props} ref={nameInput} />}
                 inputProps={{
-                  onKeyPress: saveLabelOnEnter,
+                  onKeyPress: saveNameOnEnter,
                 }}
                 value={graph.name}
                 onChange={updateName}
@@ -344,7 +344,7 @@ export default function TimeGraph(props: TimeGraphProps) {
               component="button"
               size="small"
               style={{ display: 'none', width: 'max-content', height: 'max-content' }}
-              onClick={toggleLabelInput}
+              onClick={toggleNameInput}
             >
               <Show
                 when={isEditingName()}
