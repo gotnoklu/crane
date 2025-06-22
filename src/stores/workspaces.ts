@@ -36,7 +36,7 @@ export async function addWorkspace(
     { ...workspace, id: prev[prev.length - 1].id + 1 } as Workspace,
   ])
 
-  await invoke('add_workspace', { workspace })
+  return await invoke<boolean>('add_workspace', { workspace })
 }
 
 export async function fetchAllWorkspaces() {
@@ -64,10 +64,10 @@ export async function updateWorkspace(payload: { id: number; workspace: Partial<
     return prev.slice()
   })
 
-  await invoke('update_workspace', payload)
+  return await invoke<boolean>('update_workspace', payload)
 }
 
 export async function deleteWorkspace(id: number) {
   setWorkspaces((prev) => prev.filter((workspace) => workspace.id !== id))
-  await invoke('delete_workspace', { id })
+  return await invoke<boolean>('delete_workspace', { id })
 }
