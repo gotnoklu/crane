@@ -25,12 +25,11 @@ export default function TimeGraphManager() {
     const kind = isTimer() ? 'timer' : 'stopwatch'
 
     fetchCurrentWorkspace().then((workspace) => {
-      console.log({ workspace })
       fetchAllChronographs({
         workspace_id: workspace.id,
         kind,
       }).then((chronographs) => {
-        setGraphs(chronographs)
+        setGraphs(chronographs.map((graph) => ({ ...graph, enlarged: chronographs.length === 1 })))
       })
     })
   })
@@ -42,7 +41,7 @@ export default function TimeGraphManager() {
     const duration = toMilliseconds(shouldAddTimer ? 1 : 0, 0, 0)
 
     const graph: Omit<Chronograph, 'created_at' | 'modified_at'> = {
-      id: (graphs[0]?.id ?? -1) + 1,
+      id: (graphs[graphs.length - 1]?.id ?? -1) + 1,
       workspace_id: currentWorkspace()?.id as number,
       name,
       kind,
@@ -71,6 +70,7 @@ export default function TimeGraphManager() {
 
   async function removeTimeGraph(index: number) {
     const id = graphs[index].id
+    console.log({ id })
     setGraphs((graphs) => {
       graphs.splice(index, 1)
       if (graphs.length === 1) {
