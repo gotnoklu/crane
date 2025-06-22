@@ -19,7 +19,7 @@ export async function fetchAllChronographs(payload: {
   workspace_id: number
   kind: Chronograph['kind']
 }) {
-  const chronographs = await invoke<Chronograph>('fetch_all_chronographs', payload)
+  const chronographs = await invoke<Chronograph[]>('fetch_all_chronographs', payload)
   setChronographs(chronographs)
   return chronographs
 }
