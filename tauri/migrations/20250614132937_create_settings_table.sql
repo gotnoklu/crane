@@ -1,6 +1,6 @@
 -- Add migration script here
 CREATE TABLE settings (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT 0,
   theme TEXT CHECK(theme IN ('system', 'light', 'dark')) NOT NULL DEFAULT 'system',
   show_app_in_system_tray BOOLEAN DEFAULT 0,
   notify_on_timer_complete BOOLEAN DEFAULT 0,

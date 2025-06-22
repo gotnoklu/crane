@@ -1,6 +1,6 @@
 -- Add migration script here
 CREATE TABLE chronographs (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id TEXT PRIMARY KEY NOT NULL,
   workspace_id INTEGER DEFAULT 0 REFERENCES workspaces(id) ON UPDATE CASCADE,
   name TEXT NOT NULL DEFAULT '',
   kind TEXT NOT NULL CHECK(kind IN ('timer', 'stopwatch')),

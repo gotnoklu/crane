@@ -1,6 +1,6 @@
 -- Add migration script here
 CREATE TABLE workspaces (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  id INTEGER PRIMARY KEY AUTOINCREMENT DEFAULT 0,
   title TEXT NOT NULL,
   description TEXT NOT NULL DEFAULT '',
   is_favourite BOOLEAN DEFAULT 0,
