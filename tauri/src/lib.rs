@@ -52,7 +52,7 @@ pub fn setup() -> tauri::Builder<tauri::Wry> {
                             "hide" => {
                                 // Hide all windows
                                 let _ = app.app_handle().webview_windows().iter().map(|win| {
-                                    win.1.close().expect("Failed to hide window");
+                                    win.1.hide().expect("Failed to hide window.");
                                 });
                             }
                             "quit" => {
