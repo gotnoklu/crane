@@ -1,13 +1,24 @@
 import type { Chronograph } from '../../../stores/chronographs'
-import { IconButton, Stack, SvgIcon, Typography, styled } from '@suid/material'
+import { IconButton, Stack, SvgIcon, Typography, Box, InputBase, styled } from '@suid/material'
 import { createSignal, createMemo, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { fromMilliseconds } from '../../../utilities'
 import TimeGraphCard from './card'
-import { IconCheck, IconPlayerPause, IconPlayerPlay, IconRestore } from '@tabler/icons-solidjs'
+import {
+  IconCheck,
+  IconPlayerPause,
+  IconPlayerPlay,
+  IconRestore,
+  IconPencilCheck,
+  IconPencil,
+  IconX,
+} from '@tabler/icons-solidjs'
 import { userSettings } from '../../../stores/settings'
 import { sendNotification } from '../../../stores/notifications'
-import TimeGraphHeader from './header'
+import { updateChronograph } from '../../../stores/chronographs'
+import type { ChangeEvent } from '@suid/types'
+import type { DOMElement } from 'solid-js/jsx-runtime'
+import { currentWorkspace } from '../../../stores/workspaces'
 
 export interface TimeGraphProps extends Omit<Chronograph, 'created_at' | 'modified_at'> {
   enlarged?: boolean
@@ -34,7 +45,8 @@ const StyledInput = styled('input')(({ theme }) => ({
 export default function TimeGraph(props: TimeGraphProps) {
   const baseTimeDuration = fromMilliseconds(props.duration)
 
-  const [time, setTime] = createStore({
+  const [graph, setGraph] = createStore({
+    name: props.name,
     hours: Math.min(Math.max(baseTimeDuration.hours, 0), 99),
     minutes: Math.min(Math.max(baseTimeDuration.minutes, 0), 59),
     seconds: Math.min(Math.max(baseTimeDuration.seconds, 0), 59),
@@ -42,6 +54,7 @@ export default function TimeGraph(props: TimeGraphProps) {
   })
 
   const [isRunning, setIsRunning] = createSignal(false)
+  const [isEditingName, setIsEditingName] = createSignal(false)
 
   let timer: number | undefined = undefined
   let startTime = 0
@@ -57,39 +70,64 @@ export default function TimeGraph(props: TimeGraphProps) {
         if (userSettings.notify_on_timer_complete) {
           sendNotification({ title: 'Completed!', body: `"${props.name}" is done.` })
         }
+
         clearInterval(timer)
         setIsRunning(false)
+
+        updateChronograph({
+          workspace_id: currentWorkspace()?.id as number,
+          id: props.id,
+          chronograph: {
+            name: graph.name,
+            kind: props.kind,
+            state: isRunning() ? 'active' : 'paused',
+            duration: elapsedTime,
+            is_favourite: props.is_favourite,
+          },
+        })
       }
     } else {
       elapsedTime = Date.now() - startTime
     }
 
-    setTime(fromMilliseconds(elapsedTime))
+    setGraph(fromMilliseconds(elapsedTime))
   }
 
-  function resetTimer() {
+  function resetTimeGraph() {
     clearInterval(timer)
     startTime = 0
     elapsedTime = 0
 
     if (isTimer()) {
-      setTime({
+      setGraph({
         hours: Math.min(Math.max(baseTimeDuration.hours, 0), 99),
         minutes: Math.min(Math.max(baseTimeDuration.minutes, 0), 59),
         seconds: Math.min(Math.max(baseTimeDuration.seconds, 0), 59),
         milliseconds: 0,
       })
     } else {
-      setTime({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })
+      setGraph({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })
     }
 
     setIsRunning(false)
   }
 
-  function triggerTimer() {
+  function triggerTimeGraph() {
     if (isRunning()) {
       clearInterval(timer)
       setIsRunning(false)
+
+      updateChronograph({
+        workspace_id: currentWorkspace()?.id as number,
+        id: props.id,
+        chronograph: {
+          name: graph.name,
+          kind: props.kind,
+          state: 'paused',
+          duration: elapsedTime,
+          is_favourite: props.is_favourite,
+        },
+      })
     } else {
       if (isTimer()) {
         timer = setInterval(updateTimeGraph, 1000)
@@ -97,7 +135,20 @@ export default function TimeGraph(props: TimeGraphProps) {
         startTime = Date.now() - elapsedTime
         timer = setInterval(updateTimeGraph, 10)
       }
+
       setIsRunning(true)
+
+      updateChronograph({
+        workspace_id: currentWorkspace()?.id as number,
+        id: props.id,
+        chronograph: {
+          name: graph.name,
+          kind: props.kind,
+          state: 'active',
+          duration: elapsedTime,
+          is_favourite: props.is_favourite,
+        },
+      })
     }
   }
 
@@ -139,7 +190,7 @@ export default function TimeGraph(props: TimeGraphProps) {
     const isAcceptedKey = isNumberKey || isBackspaceKey || isEnterKey || isArrowKey
     if (!isAcceptedKey) return event.preventDefault()
 
-    if (isNumberKey || isBackspaceKey) setTime('hours', calculateTimerValue(event, 99))
+    if (isNumberKey || isBackspaceKey) setGraph('hours', calculateTimerValue(event, 99))
   }
 
   function updateMinutes(
@@ -153,7 +204,7 @@ export default function TimeGraph(props: TimeGraphProps) {
     const isAcceptedKey = isNumberKey || isBackspaceKey || isEnterKey || isArrowKey
     if (!isAcceptedKey) return event.preventDefault()
 
-    if (isNumberKey || isBackspaceKey) setTime('minutes', calculateTimerValue(event))
+    if (isNumberKey || isBackspaceKey) setGraph('minutes', calculateTimerValue(event))
   }
 
   function updateSeconds(
@@ -167,12 +218,162 @@ export default function TimeGraph(props: TimeGraphProps) {
     const isAcceptedKey = isNumberKey || isBackspaceKey || isEnterKey || isArrowKey
     if (!isAcceptedKey) return event.preventDefault()
 
-    if (isNumberKey || isBackspaceKey) setTime('seconds', calculateTimerValue(event))
+    if (isNumberKey || isBackspaceKey) setGraph('seconds', calculateTimerValue(event))
+  }
+
+  const fontSize = props.enlarged ? 'h6.fontSize' : 'body1.fontSize'
+
+  function showEditButton(
+    event: MouseEvent & {
+      currentTarget: HTMLDivElement
+      target: DOMElement
+    }
+  ) {
+    const editButton = event.currentTarget.querySelector<HTMLButtonElement>('button#edit-btn')
+    if (editButton) editButton.style.display = 'inline-flex'
+  }
+
+  function hideEditButton(
+    event: MouseEvent & {
+      currentTarget: HTMLDivElement
+      target: DOMElement
+    }
+  ) {
+    if (!isEditingName()) {
+      const editButton = event.currentTarget.querySelector<HTMLButtonElement>('button#edit-btn')
+      if (editButton) editButton.style.display = 'none'
+    }
+  }
+
+  function toggleLabelInput() {
+    if (isEditingName()) {
+      setIsEditingName(false)
+    } else {
+      setIsEditingName(true)
+    }
+  }
+
+  function updateName(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+    setGraph((prev) => ({ ...prev, name: event.target.value }))
+  }
+
+  async function saveLabelOnEnter(
+    event: KeyboardEvent & {
+      currentTarget: HTMLInputElement
+      target: DOMElement
+    }
+  ) {
+    if (event.key === 'Enter') {
+      setIsEditingName(false)
+      await updateChronograph({
+        workspace_id: currentWorkspace()?.id as number,
+        id: props.id,
+        chronograph: {
+          name: graph.name,
+          kind: props.kind,
+          state: isRunning() ? 'active' : 'paused',
+          duration: elapsedTime,
+          is_favourite: props.is_favourite,
+        },
+      })
+    }
   }
 
   return (
     <TimeGraphCard running={isRunning} enlarged={props.enlarged}>
-      <TimeGraphHeader name={props.name} enlarged={props.enlarged} onClose={props.onClose} />
+      <Stack
+        component="div"
+        direction="row"
+        alignItems="center"
+        gap={1}
+        sx={{
+          inlineSize: '100%',
+          paddingX: 2,
+          ...(props.enlarged
+            ? {
+                height: 56,
+              }
+            : {
+                height: 48,
+              }),
+        }}
+      >
+        <Box flex={1}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            gap={1}
+            onMouseOver={showEditButton}
+            onMouseLeave={hideEditButton}
+          >
+            <Show
+              when={isEditingName()}
+              fallback={
+                <Typography
+                  color="text.secondary"
+                  fontSize={fontSize}
+                  fontWeight="medium"
+                  textAlign={props.enlarged ? 'center' : 'left'}
+                  sx={{ flex: 1, maxInlineSize: props.enlarged ? '100%' : '250px' }}
+                  onClick={toggleLabelInput}
+                  noWrap
+                >
+                  {graph.name}
+                </Typography>
+              }
+            >
+              <InputBase
+                id="label-input"
+                placeholder="Enter Label"
+                sx={{
+                  fontSize: fontSize,
+                  fontWeight: 'medium',
+                  maxInlineSize: props.enlarged ? '100%' : '250px',
+                  flex: 1,
+                }}
+                inputComponent={(props) => <input {...props} />}
+                inputProps={{
+                  onKeyPress: saveLabelOnEnter,
+                }}
+                value={graph.name}
+                onChange={updateName}
+              />
+            </Show>
+            <IconButton
+              id="edit-btn"
+              component="button"
+              size="small"
+              style={{ display: 'none', width: 'max-content', height: 'max-content' }}
+              onClick={toggleLabelInput}
+            >
+              <Show
+                when={isEditingName()}
+                fallback={
+                  <SvgIcon fontSize="small">
+                    <IconPencil />
+                  </SvgIcon>
+                }
+              >
+                <SvgIcon fontSize="small" color="success">
+                  <IconPencilCheck />
+                </SvgIcon>
+              </Show>
+            </IconButton>
+          </Stack>
+        </Box>
+        <Show when={typeof props.onClose === 'function'}>
+          <IconButton
+            component="button"
+            size="small"
+            onClick={props.onClose}
+            sx={{ justifySelf: 'flex-end' }}
+          >
+            <SvgIcon fontSize="small">
+              <IconX />
+            </SvgIcon>
+          </IconButton>
+        </Show>
+      </Stack>
       <Stack gap={2} paddingX={6} paddingY={3}>
         <Stack direction="row" alignItems="baseline">
           <Show
@@ -185,7 +386,7 @@ export default function TimeGraph(props: TimeGraphProps) {
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
                   width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
                 }}
-                value={time.hours.toString().padStart(2, '0')}
+                value={graph.hours.toString().padStart(2, '0')}
                 onKeyDown={updateHours}
               />
             }
@@ -195,7 +396,7 @@ export default function TimeGraph(props: TimeGraphProps) {
               variant="monospace"
               fontSize={props.enlarged ? 'h1.fontSize' : 'h4.fontSize'}
             >
-              {time.hours.toString().padStart(2, '0')}
+              {graph.hours.toString().padStart(2, '0')}
             </Typography>
           </Show>
           <Typography
@@ -215,7 +416,7 @@ export default function TimeGraph(props: TimeGraphProps) {
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
                   width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
                 }}
-                value={time.minutes.toString().padStart(2, '0')}
+                value={graph.minutes.toString().padStart(2, '0')}
                 onKeyDown={updateMinutes}
               />
             }
@@ -225,7 +426,7 @@ export default function TimeGraph(props: TimeGraphProps) {
               variant="monospace"
               fontSize={props.enlarged ? 'h1.fontSize' : 'h4.fontSize'}
             >
-              {time.minutes.toString().padStart(2, '0')}
+              {graph.minutes.toString().padStart(2, '0')}
             </Typography>
           </Show>
           <Typography
@@ -245,7 +446,7 @@ export default function TimeGraph(props: TimeGraphProps) {
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
                   width: props.enlarged ? 'max-content' : 'calc(2.125rem * 2)',
                 }}
-                value={time.seconds.toString().padStart(2, '0')}
+                value={graph.seconds.toString().padStart(2, '0')}
                 onKeyDown={updateSeconds}
               />
             }
@@ -255,7 +456,7 @@ export default function TimeGraph(props: TimeGraphProps) {
               variant="monospace"
               fontSize={props.enlarged ? 'h1.fontSize' : 'h4.fontSize'}
             >
-              {time.seconds.toString().padStart(2, '0')}
+              {graph.seconds.toString().padStart(2, '0')}
             </Typography>
           </Show>
           <Show when={!isTimer()}>
@@ -265,19 +466,19 @@ export default function TimeGraph(props: TimeGraphProps) {
               color="text.secondary"
               fontSize={props.enlarged ? 'h4.fontSize' : 'body1.fontSize'}
             >
-              .{time.milliseconds.toString().padStart(2, '0')}
+              .{graph.milliseconds.toString().padStart(2, '0')}
             </Typography>
           </Show>
         </Stack>
         <Stack direction="row" alignItems="center" justifyContent="center" flex={1} gap={1}>
-          <IconButton onClick={resetTimer}>
+          <IconButton onClick={resetTimeGraph}>
             <SvgIcon>
               <IconRestore />
             </SvgIcon>
           </IconButton>
           <IconButton
             color="primary"
-            onClick={triggerTimer}
+            onClick={triggerTimeGraph}
             disabled={props.duration === 0 && isTimer()}
           >
             <Show
