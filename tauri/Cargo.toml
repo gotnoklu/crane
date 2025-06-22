@@ -26,3 +26,4 @@ sqlx = { version = "0.8.6", features = ["runtime-tokio", "sqlite", "chrono"] }
 anyhow = "1.0.98"
 tauri-plugin-notification = "2"
 tauri-plugin-process = "2"
+nanoid = "0.4.0"

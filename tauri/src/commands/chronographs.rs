@@ -1,3 +1,4 @@
+use nanoid::nanoid;
 use serde::{Deserialize, Serialize};
 use sqlx::prelude::FromRow;
 
@@ -19,6 +20,15 @@ pub struct Chronograph {
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct ChronographInput {
     pub workspace_id: u32,
+    pub name: String,
+    pub kind: String,
+    pub state: String,
+    pub duration: i32,
+    pub is_favourite: bool,
+}
+
+#[derive(Debug, Serialize, Deserialize, FromRow)]
+pub struct ChronographUpdateInput {
     pub name: String,
     pub kind: String,
     pub state: String,
@@ -60,17 +70,20 @@ pub async fn add_chronograph(
 ) -> Result<bool, tauri::Error> {
     let statement = r#"
     INSERT INTO chronographs
-    (workspace_id, name, kind, state, duration)
-    VALUES ($1, $2, $3, $4, $5);
+    (id, workspace_id, name, kind, state, duration, is_favourite)
+    VALUES ($1, $2, $3, $4, $5, $6, $7);
   "#;
 
+    let id = nanoid!();
     let pool = &state.pool;
     let result = sqlx::query(statement)
+        .bind(&id)
         .bind(&chronograph.workspace_id)
         .bind(&chronograph.name)
         .bind(&chronograph.kind)
         .bind(&chronograph.state)
         .bind(&chronograph.duration)
+        .bind(&chronograph.is_favourite)
         .execute(pool)
         .await
         .expect("Adding chronograph failed!");
@@ -85,25 +98,31 @@ pub async fn add_chronograph(
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_chronograph(
     state: tauri::State<'_, DatabaseState>,
-    chronograph: ChronographInput,
+    id: u32,
+    workspace_id: u32,
+    chronograph: ChronographUpdateInput,
 ) -> Result<bool, tauri::Error> {
     let statement = r#"
     UPDATE chronographs
-    SET workspace_id = $1,
-        name = $2,
-        kind = $3
-        state = $4
-        duration = $5
-    WHERE id = 0;
+    SET
+        name = $1,
+        kind = $2
+        state = $3
+        duration = $4
+        is_favourite = $5
+    WHERE id = $6
+    AND workspace_id = $7;
   "#;
 
     let pool = &state.pool;
     let result = sqlx::query(statement)
-        .bind(&chronograph.workspace_id)
         .bind(&chronograph.name)
         .bind(&chronograph.kind)
         .bind(&chronograph.state)
         .bind(&chronograph.duration)
+        .bind(&chronograph.is_favourite)
+        .bind(&id)
+        .bind(&workspace_id)
         .execute(pool)
         .await
         .expect("Updating chronograph failed!");
@@ -131,8 +150,8 @@ pub async fn delete_chronograph(
 
     let pool = &state.pool;
     let result = sqlx::query(statement)
-        .bind(&id)
         .bind(&workspace_id)
+        .bind(&id)
         .execute(pool)
         .await
         .expect("Deleting chronograph failed!");
