@@ -3,12 +3,7 @@ import { createMemo, For, createEffect, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import TimeGraph, { type TimeGraphProps } from './time-graph'
 import { IconHourglassHigh, IconPlus, IconStopwatch } from '@tabler/icons-solidjs'
-import {
-  addChronograph,
-  type Chronograph,
-  deleteChronograph,
-  fetchAllChronographs,
-} from '../../stores/chronographs'
+import { addChronograph, deleteChronograph, fetchAllChronographs } from '../../stores/chronographs'
 import { toMilliseconds } from '../../utilities'
 import { currentWorkspace, fetchCurrentWorkspace } from '../../stores/workspaces'
 import { useTabs } from '../tabs/provider'
@@ -40,18 +35,16 @@ export default function TimeGraphManager() {
     const kind = shouldAddTimer ? 'timer' : 'stopwatch'
     const duration = toMilliseconds(shouldAddTimer ? 1 : 0, 0, 0)
 
-    const graph: Omit<Chronograph, 'created_at' | 'modified_at'> = {
-      id: (graphs[graphs.length - 1]?.id ?? -1) + 1,
+    const graph = await addChronograph({
       workspace_id: currentWorkspace()?.id as number,
       name,
       kind,
       duration,
       state: 'paused',
       is_favourite: false,
-    }
+    })
 
     setGraphs((graphs) => [...graphs, graph])
-    await addChronograph(graph)
   }
 
   async function removeTimeGraph(index: number) {
