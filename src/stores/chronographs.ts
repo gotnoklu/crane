@@ -6,7 +6,7 @@ export type Chronograph = {
   workspace_id: number
   name: string
   kind: 'timer' | 'stopwatch'
-  state: string
+  state: 'paused' | 'active'
   duration: number
   is_favourite: boolean
   created_at: string
@@ -32,10 +32,33 @@ export async function addChronograph(
     { ...chronograph, id: (prev[prev.length - 1]?.id ?? -1) + 1 } as Chronograph,
   ])
 
-  await invoke('add_chronograph', { chronograph })
+  return await invoke<boolean>('add_chronograph', { chronograph })
+}
+
+export async function updateChronograph(payload: {
+  workspace_id: number
+  id: number
+  chronograph: Partial<Omit<Chronograph, 'id' | 'workspace_id' | 'created_at' | 'modified_at'>>
+}) {
+  const { id } = payload
+
+  setChronographs((prev) => {
+    let index = 0
+    let item
+    for (index; index < prev.length; index++) {
+      item = prev[index]
+      if (item.id === id) {
+        prev[index] = { ...item, ...payload.chronograph }
+      }
+    }
+
+    return prev.slice()
+  })
+
+  return await invoke<boolean>('update_chronograph', payload)
 }
 
 export async function deleteChronograph(payload: { workspace_id: number; id: number }) {
   setChronographs((prev) => prev.filter((chronograph) => chronograph.id !== payload.id))
-  await invoke('delete_chronograph', payload)
+  return await invoke<boolean>('delete_chronograph', payload)
 }
