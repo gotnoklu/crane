@@ -32,7 +32,7 @@ export async function addChronograph(
     { ...chronograph, id: (prev[prev.length - 1]?.id ?? -1) + 1 } as Chronograph,
   ])
 
-  return await invoke<boolean>('add_chronograph', { chronograph })
+  return await invoke<Chronograph>('add_chronograph', { chronograph })
 }
 
 export async function updateChronograph(payload: {
