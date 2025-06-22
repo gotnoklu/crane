@@ -119,7 +119,7 @@ export default function TimeGraphManager() {
                     is_favourite={graph.is_favourite}
                     enlarged={graphs.length === 1}
                     duration={graph.duration}
-                    onClose={graphs.length > 1 ? () => removeTimeGraph(index()) : undefined}
+                    onClose={() => removeTimeGraph(index())}
                   />
                 </Grid>
               )
