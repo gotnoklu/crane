@@ -6,7 +6,7 @@ use crate::db::DatabaseState;
 
 #[derive(Debug, Serialize, Deserialize, FromRow)]
 pub struct Chronograph {
-    pub id: u32,
+    pub id: String,
     pub workspace_id: u32,
     pub name: String,
     pub kind: String,
@@ -49,7 +49,7 @@ pub async fn fetch_all_chronographs(
         workspace_id = $1
     AND
         kind = $2
-    ORDER BY id DESC;
+    ORDER BY created_at DESC;
   "#;
 
     let pool = &state.pool;
@@ -67,7 +67,7 @@ pub async fn fetch_all_chronographs(
 pub async fn add_chronograph(
     state: tauri::State<'_, DatabaseState>,
     chronograph: ChronographInput,
-) -> Result<bool, tauri::Error> {
+) -> Result<Option<Chronograph>, tauri::Error> {
     let statement = r#"
     INSERT INTO chronographs
     (id, workspace_id, name, kind, state, duration, is_favourite)
@@ -89,16 +89,33 @@ pub async fn add_chronograph(
         .expect("Adding chronograph failed!");
 
     if result.rows_affected() == 0 {
-        return Ok(false);
+        return Ok(None);
     }
 
-    Ok(true)
+    let fetch_statement = r#"
+    SELECT *
+    FROM chronographs
+    WHERE
+        workspace_id = $1
+    AND
+        id = $2
+    ORDER BY created_at DESC;
+  "#;
+
+    let output = sqlx::query_as::<_, Chronograph>(fetch_statement)
+        .bind(&chronograph.workspace_id)
+        .bind(&id)
+        .fetch_one(pool)
+        .await
+        .expect("Fetching chronograph failed!");
+
+    Ok(Some(output))
 }
 
 #[tauri::command(rename_all = "snake_case")]
 pub async fn update_chronograph(
     state: tauri::State<'_, DatabaseState>,
-    id: u32,
+    id: String,
     workspace_id: u32,
     chronograph: ChronographUpdateInput,
 ) -> Result<bool, tauri::Error> {
@@ -106,9 +123,9 @@ pub async fn update_chronograph(
     UPDATE chronographs
     SET
         name = $1,
-        kind = $2
-        state = $3
-        duration = $4
+        kind = $2,
+        state = $3,
+        duration = $4,
         is_favourite = $5
     WHERE id = $6
     AND workspace_id = $7;
@@ -138,7 +155,7 @@ pub async fn update_chronograph(
 pub async fn delete_chronograph(
     state: tauri::State<'_, DatabaseState>,
     workspace_id: u32,
-    id: u32,
+    id: String,
 ) -> Result<bool, tauri::Error> {
     let statement = r#"
      DELETE FROM chronographs
