@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "glide",
+  "productName": "Glide",
   "version": "0.1.0",
   "identifier": "com.glide.app",
   "build": {
@@ -12,9 +12,10 @@
   "app": {
     "windows": [
       {
-        "title": "glide",
-        "width": 800,
-        "height": 600
+        "title": "Glide",
+        "minWidth": 800,
+        "minHeight": 600,
+        "center": true
       }
     ],
     "security": {
