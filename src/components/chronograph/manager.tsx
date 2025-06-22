@@ -14,7 +14,7 @@ import { currentWorkspace, fetchCurrentWorkspace } from '../../stores/workspaces
 import { useTabs } from '../tabs/provider'
 
 const [graphs, setGraphs] = createStore(
-  [] as Omit<TimeGraphProps, 'created_at' | 'modified_at' | 'onClose'>[]
+  [] as Omit<TimeGraphProps, 'created_at' | 'modified_at' | 'enlarged' | 'onClose'>[]
 )
 
 export default function TimeGraphManager() {
@@ -50,35 +50,13 @@ export default function TimeGraphManager() {
       is_favourite: false,
     }
 
-    setGraphs((graphs) => {
-      if (graphs.length === 0) {
-        return [{ ...graph, enlarged: true }]
-      }
-
-      if (graphs[0]?.enlarged) {
-        return [
-          { ...graphs[0], enlarged: false },
-          { ...graph, enlarged: true },
-        ]
-      }
-
-      return [...graphs, { ...graph, enlarged: true }]
-    })
-
+    setGraphs((graphs) => [...graphs, graph])
     await addChronograph(graph)
   }
 
   async function removeTimeGraph(index: number) {
     const id = graphs[index].id
-    console.log({ id })
-    setGraphs((graphs) => {
-      graphs.splice(index, 1)
-      if (graphs.length === 1) {
-        graphs[0] = { ...graphs[0], enlarged: true }
-      }
-      return graphs.slice()
-    })
-
+    setGraphs((prev) => prev.filter((graph) => graph.id !== id))
     await deleteChronograph({ workspace_id: currentWorkspace()?.id as number, id })
   }
 
@@ -146,7 +124,7 @@ export default function TimeGraphManager() {
                     kind={graph.kind}
                     state={graph.state}
                     is_favourite={graph.is_favourite}
-                    enlarged={graph.enlarged}
+                    enlarged={graphs.length === 1}
                     duration={graph.duration}
                     onClose={graphs.length > 1 ? () => removeTimeGraph(index()) : undefined}
                   />
