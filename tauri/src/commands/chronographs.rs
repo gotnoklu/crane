@@ -49,7 +49,7 @@ pub async fn fetch_all_chronographs(
         workspace_id = $1
     AND
         kind = $2
-    ORDER BY created_at DESC;
+    ORDER BY created_at ASC;
   "#;
 
     let pool = &state.pool;
@@ -99,7 +99,7 @@ pub async fn add_chronograph(
         workspace_id = $1
     AND
         id = $2
-    ORDER BY created_at DESC;
+    ORDER BY created_at ASC;
   "#;
 
     let output = sqlx::query_as::<_, Chronograph>(fetch_statement)

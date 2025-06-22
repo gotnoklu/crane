@@ -40,7 +40,7 @@ pub async fn fetch_user_settings(
     SELECT *
     FROM settings
     WHERE id = 0
-    ORDER BY created_at DESC;
+    ORDER BY created_at ASC;
   "#;
 
     let query = sqlx::query_as::<_, UserSettings>(statement);

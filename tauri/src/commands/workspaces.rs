@@ -30,7 +30,7 @@ pub async fn fetch_all_workspaces(
     let statement = r#"
     SELECT *
     FROM workspaces
-    ORDER BY created_at DESC;
+    ORDER BY created_at ASC;
   "#;
 
     let pool = &state.pool;
