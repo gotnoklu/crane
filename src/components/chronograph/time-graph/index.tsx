@@ -9,7 +9,7 @@ import { userSettings } from '../../../stores/settings'
 import { sendNotification } from '../../../stores/notifications'
 import TimeGraphHeader from './header'
 
-export interface TimeGraphProps extends Chronograph {
+export interface TimeGraphProps extends Omit<Chronograph, 'created_at' | 'modified_at'> {
   enlarged?: boolean
   onClose?(): void
 }
@@ -38,6 +38,7 @@ export default function TimeGraph(props: TimeGraphProps) {
     hours: Math.min(Math.max(baseTimeDuration.hours, 0), 99),
     minutes: Math.min(Math.max(baseTimeDuration.minutes, 0), 59),
     seconds: Math.min(Math.max(baseTimeDuration.seconds, 0), 59),
+    milliseconds: 0,
   })
 
   const [isRunning, setIsRunning] = createSignal(false)
@@ -48,7 +49,7 @@ export default function TimeGraph(props: TimeGraphProps) {
 
   const isTimer = createMemo(() => props.kind === 'timer')
 
-  function updateTimer() {
+  function updateTimeGraph() {
     if (isTimer()) {
       elapsedTime = elapsedTime - 1000
 
@@ -73,9 +74,10 @@ export default function TimeGraph(props: TimeGraphProps) {
 
     if (isTimer()) {
       setTime({
-        hours: Math.min(Math.max(props.duration.hours, 0), 99),
-        minutes: Math.min(Math.max(props.duration.minutes, 0), 59),
-        seconds: Math.min(Math.max(props.duration.seconds, 0), 59),
+        hours: Math.min(Math.max(baseTimeDuration.hours, 0), 99),
+        minutes: Math.min(Math.max(baseTimeDuration.minutes, 0), 59),
+        seconds: Math.min(Math.max(baseTimeDuration.seconds, 0), 59),
+        milliseconds: 0,
       })
     } else {
       setTime({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })
@@ -90,10 +92,10 @@ export default function TimeGraph(props: TimeGraphProps) {
       setIsRunning(false)
     } else {
       if (isTimer()) {
-        timer = setInterval(updateTimer, 1000)
+        timer = setInterval(updateTimeGraph, 1000)
       } else {
         startTime = Date.now() - elapsedTime
-        timer = setInterval(updateStopwatch, 10)
+        timer = setInterval(updateTimeGraph, 10)
       }
       setIsRunning(true)
     }

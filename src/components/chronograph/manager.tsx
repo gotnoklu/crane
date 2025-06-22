@@ -1,14 +1,21 @@
 import { Button, Container, Grid, Stack, SvgIcon, Toolbar, Typography } from '@suid/material'
-import { createUniqueId, createMemo, For, createEffect, Show } from 'solid-js'
+import { createMemo, For, createEffect, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import TimeGraph, { type TimeGraphProps } from './time-graph'
 import { IconHourglassHigh, IconPlus, IconStopwatch } from '@tabler/icons-solidjs'
-import { addChronograph, deleteChronograph, fetchAllChronographs } from '../../stores/chronographs'
+import {
+  addChronograph,
+  type Chronograph,
+  deleteChronograph,
+  fetchAllChronographs,
+} from '../../stores/chronographs'
 import { toMilliseconds } from '../../utilities'
-import { fetchCurrentWorkspace } from '../../stores/workspaces'
+import { currentWorkspace, fetchCurrentWorkspace } from '../../stores/workspaces'
 import { useTabs } from '../tabs/provider'
 
-const [graphs, setGraphs] = createStore([] as Omit<TimeGraphProps, 'onClose'>[])
+const [graphs, setGraphs] = createStore(
+  [] as Omit<TimeGraphProps, 'created_at' | 'modified_at' | 'onClose'>[]
+)
 
 export default function TimeGraphManager() {
   const tabs = useTabs()
@@ -29,37 +36,42 @@ export default function TimeGraphManager() {
   })
 
   async function addTimeGraph() {
-    const duration = toMilliseconds(isTimer() ? 1 : 0, 0, 0)
+    const shouldAddTimer = isTimer()
+    const name = shouldAddTimer ? 'Timer' : 'Stopwatch'
+    const kind = shouldAddTimer ? 'timer' : 'stopwatch'
+    const duration = toMilliseconds(shouldAddTimer ? 1 : 0, 0, 0)
+
+    const graph: Omit<Chronograph, 'created_at' | 'modified_at'> = {
+      id: (graphs[0]?.id ?? -1) + 1,
+      workspace_id: currentWorkspace()?.id as number,
+      name,
+      kind,
+      duration,
+      state: 'paused',
+      is_favourite: false,
+    }
 
     setGraphs((graphs) => {
       if (graphs.length === 0) {
-        return [{ id: createUniqueId(), duration, enlarged: true }]
+        return [{ ...graph, enlarged: true }]
       }
 
       if (graphs[0]?.enlarged) {
         return [
           { ...graphs[0], enlarged: false },
-          { id: createUniqueId(), duration, enlarged: false },
+          { ...graph, enlarged: true },
         ]
       }
 
-      return [...graphs, { id: createUniqueId(), duration, enlarged: false }]
+      return [...graphs, { ...graph, enlarged: true }]
     })
 
-    await addChronograph({
-      workspace_id: 0,
-      name: isTimer() ? 'Timer' : 'Stopwatch',
-      kind: isTimer() ? 'timer' : 'stopwatch',
-      state: 'paused',
-      is_favourite: false,
-      duration,
-    })
+    await addChronograph(graph)
   }
 
   async function removeTimeGraph(index: number) {
-    let id: number
+    const id = graphs[index].id
     setGraphs((graphs) => {
-      id = graphs[index].id
       graphs.splice(index, 1)
       if (graphs.length === 1) {
         graphs[0] = { ...graphs[0], enlarged: true }
@@ -67,7 +79,7 @@ export default function TimeGraphManager() {
       return graphs.slice()
     })
 
-    await deleteChronograph({ workspace_id: 0, id })
+    await deleteChronograph({ workspace_id: currentWorkspace()?.id as number, id })
   }
 
   return (
@@ -129,14 +141,13 @@ export default function TimeGraphManager() {
                 <Grid item xl={3} lg={4} md={4} sm={6} xs={12}>
                   <TimeGraph
                     id={graph.id}
+                    workspace_id={graph.workspace_id}
                     name={graph.name}
                     kind={graph.kind}
                     state={graph.state}
                     is_favourite={graph.is_favourite}
                     enlarged={graph.enlarged}
                     duration={graph.duration}
-                    created_at={graph.created_at}
-                    modified_at={graph.modified_at}
                     onClose={graphs.length > 1 ? () => removeTimeGraph(index()) : undefined}
                   />
                 </Grid>
