@@ -2,7 +2,7 @@ import type { Chronograph } from '../../../stores/chronographs'
 import { IconButton, Stack, SvgIcon, Typography, Box, InputBase, styled } from '@suid/material'
 import { createSignal, createMemo, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
-import { fromMilliseconds } from '../../../utilities'
+import { fromMilliseconds, toMilliseconds } from '../../../utilities'
 import TimeGraphCard from './card'
 import {
   IconCheck,
@@ -31,7 +31,6 @@ const StyledInput = styled('input')(({ theme }) => ({
   maxWidth: '132px',
   textAlign: 'center',
   fontFamily: theme.typography.monospace?.fontFamily,
-  borderRadius: theme.shape.borderRadius * 3,
   color: theme.palette.text.primary,
   backgroundColor: 'transparent',
   transition: theme.transitions.create(['background-color'], {
@@ -43,7 +42,7 @@ const StyledInput = styled('input')(({ theme }) => ({
 }))
 
 export default function TimeGraph(props: TimeGraphProps) {
-  const baseTimeDuration = fromMilliseconds(props.duration)
+  let baseTimeDuration = fromMilliseconds(props.duration)
 
   const [graph, setGraph] = createStore({
     name: props.name,
@@ -68,7 +67,7 @@ export default function TimeGraph(props: TimeGraphProps) {
     if (isTimer()) {
       elapsedTime = elapsedTime - 1000
 
-      if (elapsedTime === 0) {
+      if (elapsedTime <= 0) {
         if (userSettings.notify_on_timer_complete) {
           sendNotification({ title: 'Completed!', body: `"${props.name}" is done.` })
         }
@@ -97,10 +96,14 @@ export default function TimeGraph(props: TimeGraphProps) {
 
   function resetTimeGraph() {
     clearInterval(timer)
-    startTime = 0
-    elapsedTime = 0
 
     if (isTimer()) {
+      elapsedTime = toMilliseconds(
+        baseTimeDuration.hours,
+        baseTimeDuration.minutes,
+        baseTimeDuration.seconds
+      )
+
       setGraph({
         hours: Math.min(Math.max(baseTimeDuration.hours, 0), 99),
         minutes: Math.min(Math.max(baseTimeDuration.minutes, 0), 59),
@@ -108,6 +111,8 @@ export default function TimeGraph(props: TimeGraphProps) {
         milliseconds: 0,
       })
     } else {
+      startTime = 0
+      elapsedTime = 0
       setGraph({ hours: 0, minutes: 0, seconds: 0, milliseconds: 0 })
     }
 
@@ -192,7 +197,17 @@ export default function TimeGraph(props: TimeGraphProps) {
     const isAcceptedKey = isNumberKey || isBackspaceKey || isEnterKey || isArrowKey
     if (!isAcceptedKey) return event.preventDefault()
 
-    if (isNumberKey || isBackspaceKey) setGraph('hours', calculateTimerValue(event, 99))
+    if (isNumberKey || isBackspaceKey) {
+      const hours = calculateTimerValue(event, 99)
+      setGraph('hours', hours)
+      elapsedTime = toMilliseconds(hours, graph.minutes, graph.seconds)
+      baseTimeDuration = {
+        hours,
+        minutes: graph.minutes,
+        seconds: graph.seconds,
+        milliseconds: graph.milliseconds,
+      }
+    }
   }
 
   function updateMinutes(
@@ -206,7 +221,17 @@ export default function TimeGraph(props: TimeGraphProps) {
     const isAcceptedKey = isNumberKey || isBackspaceKey || isEnterKey || isArrowKey
     if (!isAcceptedKey) return event.preventDefault()
 
-    if (isNumberKey || isBackspaceKey) setGraph('minutes', calculateTimerValue(event))
+    if (isNumberKey || isBackspaceKey) {
+      const minutes = calculateTimerValue(event)
+      setGraph('minutes', minutes)
+      elapsedTime = toMilliseconds(graph.hours, minutes, graph.seconds)
+      baseTimeDuration = {
+        hours: graph.hours,
+        minutes,
+        seconds: graph.seconds,
+        milliseconds: graph.milliseconds,
+      }
+    }
   }
 
   function updateSeconds(
@@ -220,7 +245,17 @@ export default function TimeGraph(props: TimeGraphProps) {
     const isAcceptedKey = isNumberKey || isBackspaceKey || isEnterKey || isArrowKey
     if (!isAcceptedKey) return event.preventDefault()
 
-    if (isNumberKey || isBackspaceKey) setGraph('seconds', calculateTimerValue(event))
+    if (isNumberKey || isBackspaceKey) {
+      const seconds = calculateTimerValue(event)
+      setGraph('seconds', seconds)
+      elapsedTime = toMilliseconds(graph.hours, graph.minutes, seconds)
+      baseTimeDuration = {
+        hours: graph.hours,
+        minutes: graph.minutes,
+        seconds,
+        milliseconds: graph.milliseconds,
+      }
+    }
   }
 
   function showEditButton(
@@ -384,7 +419,8 @@ export default function TimeGraph(props: TimeGraphProps) {
                 maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
-                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 1.5)',
+                  width: props.enlarged ? 'calc(6rem * 1.3)' : 'calc(2.125rem * 1.3)',
+                  borderRadius: props.enlarged ? 7 : 3,
                 }}
                 value={graph.hours.toString().padStart(2, '0')}
                 onKeyDown={updateHours}
@@ -395,6 +431,10 @@ export default function TimeGraph(props: TimeGraphProps) {
               component="span"
               variant="monospace"
               fontSize={props.enlarged ? 'h1.fontSize' : 'h4.fontSize'}
+              sx={{
+                width: !props.enlarged ? 'calc(2.125rem * 1.3)' : 'calc(6rem * 1.3)',
+                textAlign: 'center',
+              }}
             >
               {graph.hours.toString().padStart(2, '0')}
             </Typography>
@@ -414,7 +454,8 @@ export default function TimeGraph(props: TimeGraphProps) {
                 maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
-                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 1.5)',
+                  width: props.enlarged ? 'calc(6rem * 1.3)' : 'calc(2.125rem * 1.3)',
+                  borderRadius: props.enlarged ? 7 : 3,
                 }}
                 value={graph.minutes.toString().padStart(2, '0')}
                 onKeyDown={updateMinutes}
@@ -425,6 +466,10 @@ export default function TimeGraph(props: TimeGraphProps) {
               component="span"
               variant="monospace"
               fontSize={props.enlarged ? 'h1.fontSize' : 'h4.fontSize'}
+              sx={{
+                width: !props.enlarged ? 'calc(2.125rem * 1.3)' : 'calc(6rem * 1.3)',
+                textAlign: 'center',
+              }}
             >
               {graph.minutes.toString().padStart(2, '0')}
             </Typography>
@@ -444,7 +489,8 @@ export default function TimeGraph(props: TimeGraphProps) {
                 maxlength="2"
                 sx={{
                   fontSize: props.enlarged ? 'h1.fontSize' : 'h4.fontSize',
-                  width: props.enlarged ? 'max-content' : 'calc(2.125rem * 1.5)',
+                  width: props.enlarged ? 'calc(6rem * 1.3)' : 'calc(2.125rem * 1.3)',
+                  borderRadius: props.enlarged ? 7 : 3,
                 }}
                 value={graph.seconds.toString().padStart(2, '0')}
                 onKeyDown={updateSeconds}
@@ -455,6 +501,10 @@ export default function TimeGraph(props: TimeGraphProps) {
               component="span"
               variant="monospace"
               fontSize={props.enlarged ? 'h1.fontSize' : 'h4.fontSize'}
+              sx={{
+                width: !props.enlarged ? 'calc(2.125rem * 1.3)' : 'calc(6rem * 1.3)',
+                textAlign: 'center',
+              }}
             >
               {graph.seconds.toString().padStart(2, '0')}
             </Typography>
