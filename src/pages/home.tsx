@@ -9,7 +9,7 @@ import { IconSettings } from '@tabler/icons-solidjs'
 import { createSignal } from 'solid-js'
 
 export default function HomePage() {
-  const [open, setOpen] = createSignal()
+  const [open, setOpen] = createSignal(false)
 
   function openSettingsDialog() {
     setOpen(true)
