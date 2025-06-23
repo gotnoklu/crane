@@ -54,7 +54,7 @@ export default function TimeGraphManager() {
   }
 
   return (
-    <Stack flex={1} gap={2} height="100%">
+    <Stack flex={1} gap={2} height="100%" paddingBottom={4}>
       <Toolbar sx={{ justifyContent: 'flex-end' }}>
         <SvgIcon sx={{ color: 'text.secondary', marginRight: 2 }}>
           <Show when={isTimer()} fallback={<IconStopwatch />}>
