@@ -16,7 +16,7 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Box sx={{ width: '100%', height: '100vh', backgroundColor: 'background.default' }}>
+      <Box sx={{ width: '100%', minHeight: '100vh', backgroundColor: 'background.default' }}>
         <Router>
           <Route path="/" component={HomePage} />
         </Router>
