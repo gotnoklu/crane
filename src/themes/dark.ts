@@ -20,7 +20,7 @@ export const DarkTheme = createTheme({
       secondary: 'rgba(150, 150, 150, 0.8)',
     },
     background: {
-      default: '#1A1A1A',
+      default: '#1C1C1C',
       paper: '#0F0F0F',
     },
   },
