@@ -1,11 +1,10 @@
 import type { Chronograph } from '../../../stores/chronographs'
-import { IconButton, Stack, SvgIcon, Typography, Box, InputBase, styled } from '@suid/material'
+import { IconButton, Stack, SvgIcon, Typography, Box, InputBase, styled, Fab } from '@suid/material'
 import { createSignal, createMemo, Show } from 'solid-js'
 import { createStore } from 'solid-js/store'
 import { fromMilliseconds, toMilliseconds } from '../../../utilities'
 import TimeGraphCard from './card'
 import {
-  IconCheck,
   IconPlayerPause,
   IconPlayerPlay,
   IconRestore,
@@ -37,7 +36,7 @@ const StyledInput = styled('input')(({ theme }) => ({
     duration: theme.transitions.duration.shortest,
   }),
   '&:hover': {
-    backgroundColor: 'rgba(100, 100, 100, 0.2)',
+    backgroundColor: 'rgba(159, 159, 159, 0.2)',
   },
 }))
 
@@ -181,6 +180,21 @@ export default function TimeGraph(props: TimeGraphProps) {
       if (Number.isNaN(currentValueAsNumber)) currentValueAsNumber = max
 
       event.preventDefault()
+    } else if (event.key === 'Backspace') {
+      event.preventDefault()
+
+      let currentValue
+      if (event.currentTarget.selectionEnd === 0) {
+        currentValue = `${value}`
+      } else if (event.currentTarget.selectionEnd === 1) {
+        currentValue = `0${value[value.length - 1]}`
+      } else {
+        currentValue = `${value[0]}0`
+      }
+
+      currentValueAsNumber = Math.min(Math.max(Number.parseInt(currentValue), 0), max)
+
+      if (Number.isNaN(currentValueAsNumber)) currentValueAsNumber = max
     }
 
     return currentValueAsNumber
@@ -526,31 +540,26 @@ export default function TimeGraph(props: TimeGraphProps) {
               <IconRestore />
             </SvgIcon>
           </IconButton>
-          <IconButton
+          <Fab
             color="primary"
+            size="small"
+            sx={{ boxShadow: 'none' }}
             onClick={triggerTimeGraph}
-            disabled={props.duration === 0 && isTimer()}
+            disabled={toMilliseconds(graph.hours, graph.minutes, graph.seconds) === 0 && isTimer()}
           >
             <Show
               when={isRunning()}
               fallback={
-                <SvgIcon>
+                <SvgIcon fontSize="small">
                   <IconPlayerPlay />
                 </SvgIcon>
               }
             >
-              <SvgIcon>
+              <SvgIcon fontSize="small">
                 <IconPlayerPause />
               </SvgIcon>
             </Show>
-          </IconButton>
-          <Show when={isTimer()}>
-            <IconButton color="success">
-              <SvgIcon>
-                <IconCheck />
-              </SvgIcon>
-            </IconButton>
-          </Show>
+          </Fab>
         </Stack>
       </Stack>
     </TimeGraphCard>
