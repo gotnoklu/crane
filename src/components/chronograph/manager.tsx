@@ -55,7 +55,15 @@ export default function TimeGraphManager() {
 
   return (
     <Stack flex={1} gap={2} height="100%" paddingBottom={4}>
-      <Toolbar sx={{ justifyContent: 'flex-end' }}>
+      <Toolbar
+        sx={{
+          justifyContent: 'flex-end',
+          position: 'sticky',
+          top: 64,
+          backgroundColor: 'background.default',
+          zIndex: 10,
+        }}
+      >
         <SvgIcon sx={{ color: 'text.secondary', marginRight: 2 }}>
           <Show when={isTimer()} fallback={<IconStopwatch />}>
             <IconHourglassHigh />
@@ -88,9 +96,19 @@ export default function TimeGraphManager() {
           alignItems: graphs.length > 1 ? 'flex-start' : 'center',
           justifyContent: graphs.length > 1 ? 'flex-start' : 'center',
           height: '100%',
+          // backgroundColor: 'red',
         }}
       >
-        <Grid container spacing={4} sx={{ width: graphs.length > 1 ? '100%' : 'max-content' }}>
+        <Grid
+          container
+          spacing={6}
+          sx={{
+            width: graphs.length > 1 ? '100%' : 'max-content',
+            // backgroundColor: 'green',
+            '& .MuiGrid-item': { paddingLeft: 0 },
+            marginLeft: 0,
+          }}
+        >
           <For
             each={graphs}
             fallback={
@@ -109,7 +127,19 @@ export default function TimeGraphManager() {
           >
             {(graph, index) => {
               return (
-                <Grid item xl={3} lg={4} md={4} sm={6} xs={12}>
+                <Grid
+                  item
+                  lg={3}
+                  md={4}
+                  sm={6}
+                  xs={12}
+                  sx={{
+                    display: 'inline-flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    // border: '1px solid blue',
+                  }}
+                >
                   <TimeGraph
                     id={graph.id}
                     workspace_id={graph.workspace_id}

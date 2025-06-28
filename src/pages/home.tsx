@@ -23,7 +23,15 @@ export default function HomePage() {
     <Stack height="100%">
       <Settings open={open()} onClose={closeSettingsDialog} />
       <TabProvider>
-        <Toolbar sx={{ gap: 2 }}>
+        <Toolbar
+          sx={{
+            gap: 2,
+            position: 'sticky',
+            top: 0,
+            backgroundColor: 'background.default',
+            zIndex: 10,
+          }}
+        >
           <Tabs sx={{ width: '100%' }}>
             <Tab index={0} size="large">
               Timers
