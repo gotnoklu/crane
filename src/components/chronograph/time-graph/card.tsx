@@ -65,7 +65,7 @@ export default function TimeGraphCard(props: TimeGraphCardProps) {
           backgroundColor: props.enlarged
             ? 'background.default'
             : theme().palette.mode === 'dark'
-              ? 'rgba(20, 20, 20, 1)'
+              ? 'rgba(0, 0, 0, 1)'
               : 'rgba(245, 245, 245, 1)',
           paddingBottom: 1,
         }}
