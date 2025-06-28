@@ -600,6 +600,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "crane"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "nanoid",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tauri",
+ "tauri-build",
+ "tauri-plugin-notification",
+ "tauri-plugin-opener",
+ "tauri-plugin-process",
+]
+
+[[package]]
 name = "crc"
 version = "3.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1438,22 +1454,6 @@ checksum = "063ce2eb6a8d0ea93d2bf8ba1957e78dbab6be1c2220dd3daca57d5a9d869898"
 dependencies = [
  "libc",
  "system-deps",
-]
-
-[[package]]
-name = "crane"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "nanoid",
- "serde",
- "serde_json",
- "sqlx",
- "tauri",
- "tauri-build",
- "tauri-plugin-notification",
- "tauri-plugin-opener",
- "tauri-plugin-process",
 ]
 
 [[package]]
