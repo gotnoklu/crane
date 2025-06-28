@@ -77,7 +77,7 @@ export function Settings(props: SettingsProps) {
         <DialogActions>
           <Toolbar>
             <Button variant="contained" size="large" onClick={restartApp}>
-              Restart Glide
+              Restart Crane
             </Button>
           </Toolbar>
         </DialogActions>

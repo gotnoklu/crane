@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Glide",
+  "productName": "Crane",
   "version": "0.1.0",
-  "identifier": "com.glide.app",
+  "identifier": "com.crane.app",
   "build": {
     "beforeDevCommand": "bun run dev",
     "devUrl": "http://localhost:1420",
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Glide",
+        "title": "Crane",
         "minWidth": 800,
         "minHeight": 600,
         "center": true

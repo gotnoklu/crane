@@ -19,7 +19,7 @@ impl Database {
             fs::create_dir(&app_dir)?;
         }
 
-        let db_path = app_dir.join("glide_app.db");
+        let db_path = app_dir.join("crane_app.db");
 
         env::set_var("DATABASE_URI", format!("sqlite://{}", db_path.display()));
 
