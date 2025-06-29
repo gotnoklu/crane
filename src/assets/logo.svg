@@ -14,10 +14,25 @@
   <g
      id="layer1"
      transform="translate(-0.07938759,0.00997852)">
+    <rect
+       style="fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="rect4"
+       width="512"
+       height="512"
+       x="0"
+       y="0"
+       ry="120"
+       rx="0" />
     <path
        style="fill:none;stroke:#000000;stroke-width:20;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none"
        d="m 543.93233,201.43763 c 3.9276,-14.42423 2.1718,-30.31571 -4.81,-43.53459 -6.9818,-13.21888 -19.11724,-23.62816 -33.24495,-28.51614 -10.61769,-3.67356 -22.18751,-4.27333 -33.26913,-2.42185 -11.08162,1.85148 -21.68828,6.10062 -31.3737,11.79473 -19.37085,11.38823 -34.84847,28.26181 -49.42013,45.36701 -18.78782,22.05442 -36.6038,44.9367 -53.3789,68.5582 26.21929,1.9255 52.98267,-4.3612 75.60253,-17.75898 7.81442,-4.62849 15.14067,-10.08059 21.81819,-16.23679 l -45.15857,57.33614 76.10993,-34.50315 -10.08366,19.69642"
        id="path4"
-       transform="matrix(2.2495046,0,0,3.0104972,-738.73972,-349.05582)" />
+       transform="matrix(1.4396549,0,0,1.7595607,-380.63181,-97.64785)" />
+    <circle
+       style="fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:6;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:none;stroke-opacity:1"
+       id="path5"
+       cx="345.69186"
+       cy="296.56671"
+       r="9" />
   </g>
 </svg>
