@@ -1,3 +1,3 @@
 # Crane
 
-Improve your workflow and digital life with timers
+Improve your digital life with timers

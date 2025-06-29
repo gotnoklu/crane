@@ -1,7 +1,7 @@
 {
   "name": "crane",
   "version": "0.1.0",
-  "description": "Improve your workflow and digital life with timers",
+  "description": "Improve your digital life with timers",
   "type": "module",
   "scripts": {
     "start": "vite",
