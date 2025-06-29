@@ -12,7 +12,9 @@
     "app:dev": "tauri dev",
     "app:build": "tauri build",
     "app:build:android:aab": "tauri android build --aab",
-    "app:build:android:apk": "tauri android build --apk"
+    "app:build:android:apk": "tauri android build --apk",
+    "app:build:windows:nsis": "tauri build --runner cargo-xwin --target x86_64-pc-windows-msvc",
+    "app:build:mac:dmg": "tauri build --bundles dmg"
   },
   "license": "MIT",
   "dependencies": {
