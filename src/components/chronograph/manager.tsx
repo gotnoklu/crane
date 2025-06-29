@@ -134,7 +134,7 @@ export default function TimeGraphManager() {
                   sm={6}
                   xs={12}
                   sx={{
-                    display: 'inline-flex',
+                    display: graphs.length > 1 ? 'inline-flex' : 'block',
                     justifyContent: 'center',
                     alignItems: 'center',
                     // border: '1px solid blue',

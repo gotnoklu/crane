@@ -20,7 +20,7 @@ export default function HomePage() {
   }
 
   return (
-    <Stack height="100%">
+    <Stack height="100vh">
       <Settings open={open()} onClose={closeSettingsDialog} />
       <TabProvider>
         <Toolbar
