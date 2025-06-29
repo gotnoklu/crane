@@ -1,6 +1,6 @@
 {
   "name": "crane",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Improve your digital life with timers",
   "type": "module",
   "scripts": {
