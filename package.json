@@ -9,7 +9,10 @@
     "build": "vite build",
     "serve": "vite preview",
     "tauri": "tauri",
-    "app:dev": "tauri dev"
+    "app:dev": "tauri dev",
+    "app:build": "tauri build",
+    "app:build:android:aab": "tauri android build --aab",
+    "app:build:android:apk": "tauri android build --apk"
   },
   "license": "MIT",
   "dependencies": {
